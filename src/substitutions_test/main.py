@@ -1,31 +1,28 @@
-import typing
-import openpyxl, openpyxl.worksheet.worksheet, openpyxl.cell, pyquoks
-import constants
+import openpyxl, pyquoks
+import data
 
 
-def get_formatted_row(
-        worksheet: openpyxl.worksheet.worksheet.Worksheet,
-        row: tuple[openpyxl.cell.Cell, ...]
-) -> typing.Generator[str]:
-    for cell in row[:constants.TABLE_WIDTH]:
-        column_max_len = max([
-            len(str(c_cell.value).replace(str(None), "")) for c_cell in list(
-                worksheet.columns
-            )[cell.column - 1][constants.TABLE_HEADER_INDEX:]
-        ])
+def main():
+    filenames = [
+        "substitutions",
+        "substitutions_old",
+    ]
 
-        yield str(cell.value).replace(str(None), "").ljust(column_max_len) if row[0].value else "—" * column_max_len
+    for filename in filenames:
+        workbook = openpyxl.load_workbook(
+            filename=pyquoks.utils.get_path(f"tables/{filename}.xlsx"),
+        )
 
+        worksheet = workbook.worksheets[0]
 
-def main() -> None:
-    workbook = openpyxl.load_workbook(
-        filename=pyquoks.utils.get_path("tables/substitutions.xlsx"),
-    )
-
-    worksheet = workbook.worksheets[0]
-
-    for row in list(worksheet.rows)[constants.TABLE_HEADER_INDEX:]:
-        print(f"| {" | ".join(get_formatted_row(worksheet, row))} |")
+        print(
+            f"\n{filename}:",
+            *map(
+                lambda model: model._data,
+                data.get_substitutions(worksheet),
+            ),
+            sep="\n",
+        )
 
 
 if __name__ == "__main__":
