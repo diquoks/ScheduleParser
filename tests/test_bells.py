@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import pyquoks
-import models
+
 import _test_utils
+import models
 
 
 class TestBells(pyquoks.test.TestCase):

@@ -1,6 +1,10 @@
 from __future__ import annotations
-import openpyxl, pyquoks
-import models, misc
+
+import openpyxl
+import pyquoks
+
+import misc
+import models
 
 
 class TestSubstitutions(pyquoks.test.TestCase):
