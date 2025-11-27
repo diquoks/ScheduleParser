@@ -27,9 +27,9 @@ class TestSubstitutions(pyquoks.test.TestCase):
 
             worksheet = workbook.worksheets[0]
 
-            for a in list(misc.parse_substitutions(worksheet)):
+            for substitution in list(misc.parse_substitutions(worksheet)):
                 self.assert_type(
                     func_name=self.test_parse_substitutions.__name__,
-                    test_data=a,
+                    test_data=substitution,
                     test_type=models.SubstitutionModel,
                 )

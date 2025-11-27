@@ -27,13 +27,13 @@ class BellsScheduleContainer(pyquoks.models.Container):
             weekday: models.Weekdays,
     ) -> models.BellsVariantContainer:
         match weekday:
-            case models.Weekdays.Monday:
+            case models.Weekdays.MONDAY:
                 return self.variants[BellsVariants.Monday.value]
-            case models.Weekdays.Wednesday:
+            case models.Weekdays.WEDNESDAY:
                 return self.variants[BellsVariants.Wednesday.value]
-            case models.Weekdays.Tuesday | models.Weekdays.Thursday | models.Weekdays.Friday | models.Weekdays.Saturday:
+            case models.Weekdays.TUESDAY | models.Weekdays.THURSDAY | models.Weekdays.FRIDAY | models.Weekdays.SATURDAY:
                 return self.variants[BellsVariants.Other.value]
-            case models.Weekdays.Sunday:
+            case models.Weekdays.SUNDAY:
                 raise ValueError
 
 

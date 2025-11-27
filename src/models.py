@@ -8,13 +8,13 @@ import pyquoks
 # region Enums
 
 class Weekdays(enum.Enum):
-    Monday = 0
-    Tuesday = 1
-    Wednesday = 2
-    Thursday = 3
-    Friday = 4
-    Saturday = 5
-    Sunday = 6
+    MONDAY = 1
+    TUESDAY = 2
+    WEDNESDAY = 3
+    THURSDAY = 4
+    FRIDAY = 5
+    SATURDAY = 6
+    SUNDAY = 7
 
 
 # endregion
@@ -36,6 +36,10 @@ class PeriodModel(pyquoks.models.Model):
     subgroup: int
     subject: str
 
+    @property
+    def is_empty(self) -> bool:
+        return not bool(self.lecturer and self.room and self.subject)
+
 
 class SubstitutionModel(pyquoks.models.Model):
     _ATTRIBUTES = {
@@ -50,6 +54,14 @@ class SubstitutionModel(pyquoks.models.Model):
     group: str
     period: PeriodModel
     substitution: PeriodModel
+
+    @property
+    def number(self) -> int:
+        return self.substitution.number
+
+    @property
+    def subgroup(self) -> int:
+        return self.substitution.subgroup
 
 
 class BellsVariantContainer(pyquoks.models.Container):
