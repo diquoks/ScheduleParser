@@ -62,7 +62,7 @@ def parse_schedule(
                                 "number": _get_number(period[first_column][0].row),
                                 "room": period[second_column][0].value,
                                 "subgroup": _get_subgroup(period[first_column][0].column),
-                                "subject": period[first_column][1].value,
+                                "subject": period[first_column][0].value,
                             },
                         )
 
@@ -202,11 +202,11 @@ def parse_substitutions(
             data={
                 "group": group,
                 "period": _get_period(
-                    *row_values[4:],
+                    *row_values[:4],
                     number=period_number,
                 )._data,
                 "substitution": _get_period(
-                    *row_values[:4],
+                    *row_values[4:],
                     number=period_number,
                 )._data,
             },
