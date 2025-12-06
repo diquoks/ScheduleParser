@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SubstitutionsParser.iml" filepath="$PROJECT_DIR$/.idea/SubstitutionsParser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ScheduleParser.iml" filepath="$PROJECT_DIR$/.idea/ScheduleParser.iml" />
     </modules>
   </component>
 </project>
