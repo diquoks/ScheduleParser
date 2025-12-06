@@ -1,4 +1,4 @@
-﻿# SubstitutionsParser
+﻿# ScheduleParser
 
 #### Ты думал тут что-то будет?
 
