@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pyquoks
 
 import _test_utils
