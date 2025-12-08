@@ -1,4 +1,5 @@
 import enum
+import typing
 
 import pyquoks
 
@@ -6,13 +7,13 @@ import pyquoks
 # region Enums
 
 class Weekday(enum.Enum):
-    MONDAY = 1
-    TUESDAY = 2
-    WEDNESDAY = 3
-    THURSDAY = 4
-    FRIDAY = 5
-    SATURDAY = 6
-    SUNDAY = 7
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
 
     @staticmethod
     def from_string(string: str) -> Weekday:
@@ -174,6 +175,20 @@ class GroupSchedulesListing(pyquoks.models.Listing):
 
     schedule: list[GroupScheduleContainer]
 
+    @staticmethod
+    def from_iterable(iterable: typing.Iterable[GroupScheduleContainer]) -> GroupSchedulesListing:
+        def _get_model_data(model: GroupScheduleContainer) -> dict:
+            return model._data
+
+        return GroupSchedulesListing(
+            data=list(
+                map(
+                    _get_model_data,
+                    iterable,
+                )
+            ),
+        )
+
     def get_group_schedule(self, group: str) -> GroupScheduleContainer | None:
         try:
             return list(
@@ -215,6 +230,20 @@ class SubstitutionsListing(pyquoks.models.Listing):
     }
 
     substitutions: list[SubstitutionModel]
+
+    @staticmethod
+    def from_iterable(iterable: typing.Iterable[SubstitutionModel]) -> SubstitutionsListing:
+        def _get_model_data(model: SubstitutionModel) -> dict:
+            return model._data
+
+        return SubstitutionsListing(
+            data=list(
+                map(
+                    _get_model_data,
+                    iterable,
+                )
+            ),
+        )
 
     def get_substitutions_by_group(self, group: str) -> list[SubstitutionModel]:
         return list(

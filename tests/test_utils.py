@@ -100,18 +100,14 @@ class TestUtils(pyquoks.test.TestCase):
             current_date = datetime.datetime.strptime(name, "%d_%m_%y")
 
             current_schedule = schedule_parser.utils.get_schedule_with_substitutions(
-                schedule=schedule_parser.models.GroupSchedulesListing(
-                    data=schedule_parser.utils._get_data_from_models_iterable(
-                        models_iterable=schedule_parser.utils.parse_schedule(
-                            worksheet=workbook_schedule.worksheets[0],
-                        ),
+                schedule=schedule_parser.models.GroupSchedulesListing.from_iterable(
+                    iterable=schedule_parser.utils.parse_schedule(
+                        worksheet=workbook_schedule.worksheets[0],
                     ),
                 ),
-                substitutions=schedule_parser.models.SubstitutionsListing(
-                    data=schedule_parser.utils._get_data_from_models_iterable(
-                        models_iterable=schedule_parser.utils.parse_substitutions(
-                            worksheet=workbook_substitutions.worksheets[0],
-                        ),
+                substitutions=schedule_parser.models.SubstitutionsListing.from_iterable(
+                    iterable=schedule_parser.utils.parse_substitutions(
+                        worksheet=workbook_substitutions.worksheets[0],
                     ),
                 ),
                 group=self._group,

@@ -11,23 +11,22 @@ import schedule_parser.constants
 import schedule_parser.models
 
 
-def _get_data_from_models_iterable(
-        models_iterable: typing.Iterable[pyquoks.models._HasInitialData],
-) -> list[typing.Any]:
-    def _get_model_data(model: pyquoks.models._HasInitialData) -> typing.Any:
-        return model._data
-
-    return list(
-        map(
-            _get_model_data,
-            models_iterable,
-        )
-    )
-
-
 def parse_schedule(
         worksheet: openpyxl.worksheet.worksheet.Worksheet,
 ) -> typing.Generator[schedule_parser.models.GroupScheduleContainer]:
+    def _get_data_from_models_iterable(
+            models_iterable: typing.Iterable[pyquoks.models._HasInitialData],
+    ) -> list[typing.Any]:
+        def _get_model_data(model: pyquoks.models._HasInitialData) -> typing.Any:
+            return model._data
+
+        return list(
+            map(
+                _get_model_data,
+                models_iterable,
+            )
+        )
+
     def _get_periods(
             columns: list[list[openpyxl.cell.cell.Cell]],
     ) -> typing.Generator[schedule_parser.models.PeriodModel]:
@@ -260,14 +259,13 @@ def get_schedule_with_substitutions(
 
         for first_period in periods:
             for second_period in periods:
-                if not first_period.is_same_but_metadata(second_period) and first_period.is_same_but_subgroup(
-                        second_period):
+                if (not first_period.is_same_but_metadata(second_period)
+                        and first_period.is_same_but_subgroup(second_period)):
                     first_period.subgroup = 0
                     filtered_periods.append(first_period)
                     break
             else:
-                filtered_periods.append(first_period)
-                filtered_periods.append(first_period)
+                filtered_periods.extend([first_period] * 2)
 
         filtered_periods.sort(
             key=lambda period: (period.number, period.subgroup),
@@ -278,7 +276,7 @@ def get_schedule_with_substitutions(
     schedule = (
         schedule.get_group_schedule(group)
         .get_week_schedule_by_parity(get_week_number(date) % 2 == 0)
-        .get_day_schedule_by_weekday(schedule_parser.models.Weekday(date.weekday() + 1))
+        .get_day_schedule_by_weekday(schedule_parser.models.Weekday(date.weekday()))
         .schedule
     )
 
