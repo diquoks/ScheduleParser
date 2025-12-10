@@ -13,18 +13,18 @@ class TestBells(pyquoks.test.TestCase):
 
         cls._data_provider = _test_utils.DataProvider()
 
-    def test_get_variant_by_weekday(self) -> None:
+    def test_get_bells_variant(self) -> None:
         for weekday in schedule_parser.models.Weekday:
             if weekday != schedule_parser.models.Weekday.SUNDAY:
                 self.assert_type(
-                    func_name=self.test_get_variant_by_weekday.__name__,
-                    test_data=self._data_provider.bells.get_variant_by_weekday(weekday),
-                    test_type=schedule_parser.models.BellsVariantContainer,
+                    func_name=self.test_get_bells_variant.__name__,
+                    test_data=self._data_provider.get_bells_variant_by_weekday(weekday),
+                    test_type=schedule_parser.models.BellsVariant,
                 )
 
         self.assert_raises(
-            func_name=self.test_get_variant_by_weekday.__name__,
-            test_func=self._data_provider.bells.get_variant_by_weekday,
+            func_name=self.test_get_bells_variant.__name__,
+            test_func=self._data_provider.get_bells_variant_by_weekday,
             test_exception=ValueError,
             weekday=schedule_parser.models.Weekday.SUNDAY,
         )

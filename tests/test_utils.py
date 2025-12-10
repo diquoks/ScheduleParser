@@ -15,8 +15,8 @@ class TestUtils(pyquoks.test.TestCase):
 
         cls._substitutions_names = [
             "substitutions",
-            "substitutions_incorrect",
             "substitutions_old",
+            "substitutions_incorrect",
         ]
 
         cls._group = "СИСАД 24-01"
@@ -69,7 +69,7 @@ class TestUtils(pyquoks.test.TestCase):
             self.assert_type(
                 func_name=self.test_parse_schedule.__name__,
                 test_data=group,
-                test_type=schedule_parser.models.GroupScheduleContainer,
+                test_type=schedule_parser.models.GroupSchedule,
                 message="objects in parsed schedules list",
             )
 
@@ -83,7 +83,7 @@ class TestUtils(pyquoks.test.TestCase):
                 self.assert_type(
                     func_name=self.test_parse_substitutions.__name__,
                     test_data=substitution,
-                    test_type=schedule_parser.models.SubstitutionModel,
+                    test_type=schedule_parser.models.Substitution,
                     message=f"({name}) objects in parsed substitutions list",
                 )
 
@@ -100,15 +100,15 @@ class TestUtils(pyquoks.test.TestCase):
             current_date = datetime.datetime.strptime(name, "%d_%m_%y")
 
             current_schedule = schedule_parser.utils.get_schedule_with_substitutions(
-                schedule=schedule_parser.models.GroupSchedulesListing.from_iterable(
-                    iterable=schedule_parser.utils.parse_schedule(
+                schedule=list(
+                    schedule_parser.utils.parse_schedule(
                         worksheet=workbook_schedule.worksheets[0],
-                    ),
+                    )
                 ),
-                substitutions=schedule_parser.models.SubstitutionsListing.from_iterable(
-                    iterable=schedule_parser.utils.parse_substitutions(
+                substitutions=list(
+                    schedule_parser.utils.parse_substitutions(
                         worksheet=workbook_substitutions.worksheets[0],
-                    ),
+                    )
                 ),
                 group=self._group,
                 date=current_date,
