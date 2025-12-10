@@ -13,34 +13,32 @@ class BellsVariants(enum.Enum):
     Other = 2
 
 
-class BellsScheduleListing(schedule_parser.models.BellsScheduleListing):
-    def get_variant_by_weekday(
-            self,
-            weekday: schedule_parser.models.Weekday,
-    ) -> schedule_parser.models.BellsVariantContainer:
-        match weekday:
-            case schedule_parser.models.Weekday.MONDAY:
-                return self.variants[BellsVariants.Monday.value]
-            case schedule_parser.models.Weekday.WEDNESDAY:
-                return self.variants[BellsVariants.Wednesday.value]
-            case schedule_parser.models.Weekday.TUESDAY | schedule_parser.models.Weekday.THURSDAY | \
-                 schedule_parser.models.Weekday.FRIDAY | schedule_parser.models.Weekday.SATURDAY:
-                return self.variants[BellsVariants.Other.value]
-            case schedule_parser.models.Weekday.SUNDAY:
-                raise ValueError
-
-
 # endregion
 
 # region data.py
 
 class DataProvider(pyquoks.data.DataManager):
     _OBJECTS = {
-        "bells": BellsScheduleListing
+        "bells": list[schedule_parser.models.BellsVariant],
     }
 
     _PATH = pyquoks.utils.get_path("resources/data/")
 
-    bells: BellsScheduleListing
+    bells: list[schedule_parser.models.BellsVariant]
+
+    def get_bells_variant_by_weekday(
+            self,
+            weekday: schedule_parser.models.Weekday
+    ) -> schedule_parser.models.BellsVariant:
+        match weekday:
+            case schedule_parser.models.Weekday.MONDAY:
+                return self.bells[BellsVariants.Monday.value]
+            case schedule_parser.models.Weekday.WEDNESDAY:
+                return self.bells[BellsVariants.Wednesday.value]
+            case schedule_parser.models.Weekday.TUESDAY | schedule_parser.models.Weekday.THURSDAY | \
+                 schedule_parser.models.Weekday.FRIDAY | schedule_parser.models.Weekday.SATURDAY:
+                return self.bells[BellsVariants.Other.value]
+            case schedule_parser.models.Weekday.SUNDAY:
+                raise ValueError
 
 # endregion

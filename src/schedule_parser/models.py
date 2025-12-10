@@ -1,7 +1,7 @@
 import enum
 import typing
 
-import pyquoks
+import pydantic
 
 
 # region Enums
@@ -38,17 +38,9 @@ class Weekday(enum.Enum):
 
 # endregion
 
-# region Models & Containers
+# region Models
 
-class PeriodModel(pyquoks.models.Model):
-    _ATTRIBUTES = {
-        "lecturer",
-        "number",
-        "room",
-        "subgroup",
-        "subject",
-    }
-
+class Period(pydantic.BaseModel):
     lecturer: str
     number: int
     room: str
@@ -72,15 +64,17 @@ class PeriodModel(pyquoks.models.Model):
             raise ValueError("Period is empty!")
         else:
             return " | ".join([
-                " ".join(i for i in [
-                    f"{self.number}.",
-                    f"({self.subgroup})" if self.subgroup else "",
-                    self.subject,
-                ] if i),
+                " ".join([
+                    i for i in [
+                        f"{self.number}.",
+                        f"({self.subgroup})" if self.subgroup else "",
+                        self.subject,
+                    ] if i
+                ]),
                 self.formatted_room,
             ])
 
-    def is_same_but_metadata(self, period: PeriodModel) -> bool:
+    def is_same_period(self, period: typing.Self) -> bool:
         return (
             self.number,
             self.subgroup,
@@ -89,7 +83,7 @@ class PeriodModel(pyquoks.models.Model):
             period.subgroup,
         )
 
-    def is_same_but_subgroup(self, period: PeriodModel) -> bool:
+    def is_same_metadata(self, period: typing.Self) -> bool:
         return (
             self.lecturer,
             self.number,
@@ -103,117 +97,48 @@ class PeriodModel(pyquoks.models.Model):
         )
 
 
-class DayScheduleContainer(pyquoks.models.Container):
-    _ATTRIBUTES = {
-        "weekday",
-    }
-
-    _DATA = {
-        "schedule": PeriodModel,
-    }
-
-    schedule: list[PeriodModel]
+class DaySchedule(pydantic.BaseModel):
+    schedule: list[Period]
     weekday: int
 
-    @property
-    def is_empty(self) -> bool:
-        return not bool(self.schedule)
 
-
-class WeekScheduleContainer(pyquoks.models.Container):
-    _ATTRIBUTES = {
-        "parity",
-    }
-
-    _DATA = {
-        "schedule": DayScheduleContainer,
-    }
-
+class WeekSchedule(pydantic.BaseModel):
     parity: bool
-    schedule: list[DayScheduleContainer]
+    schedule: list[DaySchedule]
 
-    def get_day_schedule_by_weekday(self, weekday: Weekday) -> DayScheduleContainer | None:
+    def get_day_schedule_by_weekday(self, weekday: Weekday) -> DaySchedule | None:
         try:
-            return list(
-                filter(
-                    lambda schedule: schedule.weekday == weekday.value,
-                    self.schedule,
-                )
-            )[0]
+            return [model for model in self.schedule if model.weekday == weekday.value][0]
         except IndexError:
             raise ValueError(f"Could not find schedule for weekday: {weekday!r}")
 
 
-class GroupScheduleContainer(pyquoks.models.Container):
-    _ATTRIBUTES = {
-        "group",
-    }
-
-    _DATA = {
-        "schedule": WeekScheduleContainer,
-    }
-
+class GroupSchedule(pydantic.BaseModel):
     group: str
-    schedule: list[WeekScheduleContainer]
+    schedule: list[WeekSchedule]
 
-    def get_week_schedule_by_parity(self, parity: bool) -> WeekScheduleContainer | None:
+    @classmethod
+    def get_group_schedule_by_group(cls, iterable: typing.Iterable[typing.Self], group: str) -> typing.Self:
         try:
-            return list(
-                filter(
-                    lambda schedule: schedule.parity == parity,
-                    self.schedule,
-                )
-            )[0]
+            return [model for model in iterable if model.group == group][0]
+        except IndexError:
+            raise ValueError(f"Could not find schedule for group: {group!r}")
+
+    def get_week_schedule_by_parity(self, parity: bool) -> WeekSchedule | None:
+        try:
+            return [model for model in self.schedule if model.parity == parity][0]
         except IndexError:
             raise ValueError(f"Could not find schedule for parity: {parity!r}")
 
 
-class GroupSchedulesListing(pyquoks.models.Listing):
-    _DATA = {
-        "schedule": GroupScheduleContainer,
-    }
-
-    schedule: list[GroupScheduleContainer]
-
-    @staticmethod
-    def from_iterable(iterable: typing.Iterable[GroupScheduleContainer]) -> GroupSchedulesListing:
-        def _get_model_data(model: GroupScheduleContainer) -> dict:
-            return model._data
-
-        return GroupSchedulesListing(
-            data=list(
-                map(
-                    _get_model_data,
-                    iterable,
-                )
-            ),
-        )
-
-    def get_group_schedule(self, group: str) -> GroupScheduleContainer | None:
-        try:
-            return list(
-                filter(
-                    lambda schedule: schedule.group == group,
-                    self.schedule,
-                )
-            )[0]
-        except IndexError:
-            raise ValueError(f"Could not find schedule for group: {group!r}")
-
-
-class SubstitutionModel(pyquoks.models.Model):
-    _ATTRIBUTES = {
-        "group",
-    }
-
-    _OBJECTS = {
-        "period": PeriodModel,
-        "substitution": PeriodModel,
-    }
-
+class Substitution(pydantic.BaseModel):
     group: str
-    period: PeriodModel
-    substitution: PeriodModel
+    period: Period
+    substitution: Period
+
+    @classmethod
+    def get_substitutions_by_group(cls, iterable: typing.Iterable[typing.Self], group: str) -> list[typing.Self]:
+        return [model for model in iterable if model.group == group]
 
     @property
     def number(self) -> int:
@@ -224,61 +149,13 @@ class SubstitutionModel(pyquoks.models.Model):
         return self.substitution.subgroup
 
 
-class SubstitutionsListing(pyquoks.models.Listing):
-    _DATA = {
-        "substitutions": SubstitutionModel,
-    }
-
-    substitutions: list[SubstitutionModel]
-
-    @staticmethod
-    def from_iterable(iterable: typing.Iterable[SubstitutionModel]) -> SubstitutionsListing:
-        def _get_model_data(model: SubstitutionModel) -> dict:
-            return model._data
-
-        return SubstitutionsListing(
-            data=list(
-                map(
-                    _get_model_data,
-                    iterable,
-                )
-            ),
-        )
-
-    def get_substitutions_by_group(self, group: str) -> list[SubstitutionModel]:
-        return list(
-            filter(
-                lambda substitution: substitution.group == group,
-                self.substitutions,
-            )
-        )
-
-
-class BellsVariantContainer(pyquoks.models.Container):
-    _DATA = {
-        "bells": str,
-    }
-
+class BellsVariant(pydantic.BaseModel):
     bells: list[str]
 
-    def format_period(self, period: PeriodModel) -> str:
+    def format_period(self, period: Period) -> str:
         return " | ".join([
             self.bells[period.number],
             period.readable,
         ])
-
-
-class BellsScheduleListing(pyquoks.models.Listing):
-    _DATA = {
-        "variants": BellsVariantContainer,
-    }
-
-    variants: list[BellsVariantContainer]
-
-    def get_variant_by_weekday(
-            self,
-            weekday: Weekday,
-    ) -> BellsVariantContainer:
-        raise NotImplementedError()
 
 # endregion
