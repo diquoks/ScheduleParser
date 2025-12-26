@@ -14,14 +14,14 @@ class TestUtils(pyquoks.test.TestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
 
-        cls._substitutions_names = [
+        cls._SUBSTITUTIONS_NAMES = [
             "substitutions",
             "substitutions_old",
             "substitutions_incorrect",
         ]
 
-        cls._group = "СИСАД 24-01"
-        cls._schedule_with_substitutions = {
+        cls._GROUP = "СИСАД 24-01"
+        cls._SCHEDULE_WITH_SUBSTITUTIONS = {
             "08_11_25": "",
             "18_11_25": textwrap.dedent(
                 """\
@@ -85,9 +85,9 @@ class TestUtils(pyquoks.test.TestCase):
             )
 
     def test_parse_substitutions(self):
-        for name in self._substitutions_names:
+        for substitution_name in self._SUBSTITUTIONS_NAMES:
             workbook = openpyxl.load_workbook(
-                filename=pyquoks.utils.get_path(f"resources/tables/{name}.xlsx"),
+                filename=pyquoks.utils.get_path(f"resources/tables/{substitution_name}.xlsx"),
             )
 
             for substitution in list(schedule_parser.utils.parse_substitutions(workbook.worksheets[0])):
@@ -95,7 +95,7 @@ class TestUtils(pyquoks.test.TestCase):
                     func_name=self.test_parse_substitutions.__name__,
                     test_data=substitution,
                     test_type=schedule_parser.models.Substitution,
-                    message=f"({name}) objects in parsed substitutions list",
+                    message=f"({substitution_name}) objects in parsed substitutions list",
                 )
 
     def test_schedule_with_substitutions(self):
@@ -103,7 +103,7 @@ class TestUtils(pyquoks.test.TestCase):
             filename=pyquoks.utils.get_path("resources/tables/schedule.xlsx"),
         )
 
-        for name, correct_schedule in self._schedule_with_substitutions.items():
+        for name, correct_schedule in self._SCHEDULE_WITH_SUBSTITUTIONS.items():
             workbook_substitutions = openpyxl.load_workbook(
                 filename=pyquoks.utils.get_path(f"resources/tables/substitutions_{name}.xlsx"),
             )
@@ -121,7 +121,7 @@ class TestUtils(pyquoks.test.TestCase):
                         worksheet=workbook_substitutions.worksheets[0],
                     )
                 ),
-                group=self._group,
+                group=self._GROUP,
                 date=current_date,
             )
 
