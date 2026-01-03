@@ -4,7 +4,7 @@ import textwrap
 import openpyxl
 import pyquoks
 
-import schedule_parser
+import src.schedule_parser
 
 
 class TestUtils(pyquoks.test.TestCase):
@@ -73,51 +73,51 @@ class TestUtils(pyquoks.test.TestCase):
 
     def test_parse_schedule(self):
         workbook = openpyxl.load_workbook(
-            filename=pyquoks.utils.get_path("resources/tables/schedule.xlsx"),
+            filename=pyquoks.utils.get_path("tests/resources/tables/schedule.xlsx"),
         )
 
-        for group in list(schedule_parser.utils.parse_schedule(workbook.worksheets[0])):
+        for group in list(src.schedule_parser.utils.parse_schedule(workbook.worksheets[0])):
             self.assert_type(
                 func_name=self.test_parse_schedule.__name__,
                 test_data=group,
-                test_type=schedule_parser.models.GroupSchedule,
+                test_type=src.schedule_parser.models.GroupSchedule,
                 message="objects in parsed schedules list",
             )
 
     def test_parse_substitutions(self):
         for substitution_name in self._SUBSTITUTIONS_NAMES:
             workbook = openpyxl.load_workbook(
-                filename=pyquoks.utils.get_path(f"resources/tables/{substitution_name}.xlsx"),
+                filename=pyquoks.utils.get_path(f"tests/resources/tables/{substitution_name}.xlsx"),
             )
 
-            for substitution in list(schedule_parser.utils.parse_substitutions(workbook.worksheets[0])):
+            for substitution in list(src.schedule_parser.utils.parse_substitutions(workbook.worksheets[0])):
                 self.assert_type(
                     func_name=self.test_parse_substitutions.__name__,
                     test_data=substitution,
-                    test_type=schedule_parser.models.Substitution,
+                    test_type=src.schedule_parser.models.Substitution,
                     message=f"({substitution_name}) objects in parsed substitutions list",
                 )
 
     def test_schedule_with_substitutions(self):
         workbook_schedule = openpyxl.load_workbook(
-            filename=pyquoks.utils.get_path("resources/tables/schedule.xlsx"),
+            filename=pyquoks.utils.get_path("tests/resources/tables/schedule.xlsx"),
         )
 
         for name, correct_schedule in self._SCHEDULE_WITH_SUBSTITUTIONS.items():
             workbook_substitutions = openpyxl.load_workbook(
-                filename=pyquoks.utils.get_path(f"resources/tables/substitutions_{name}.xlsx"),
+                filename=pyquoks.utils.get_path(f"tests/resources/tables/substitutions_{name}.xlsx"),
             )
 
             current_date = datetime.datetime.strptime(name, "%d_%m_%y")
 
-            current_schedule = schedule_parser.utils.get_schedule_with_substitutions(
+            current_schedule = src.schedule_parser.utils.get_schedule_with_substitutions(
                 schedule=list(
-                    schedule_parser.utils.parse_schedule(
+                    src.schedule_parser.utils.parse_schedule(
                         worksheet=workbook_schedule.worksheets[0],
                     )
                 ),
                 substitutions=list(
-                    schedule_parser.utils.parse_substitutions(
+                    src.schedule_parser.utils.parse_substitutions(
                         worksheet=workbook_substitutions.worksheets[0],
                     )
                 ),
